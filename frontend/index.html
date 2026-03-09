@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Pesquisa - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-8 border-b pb-4">Dashboard - Configuração</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">1. Cadastrar Empresa</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Nome da Empresa</label>
+                        <input type="text" id="nome_empresa" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ex: Amafil">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Servidor SMTP</label>
+                        <input type="text" id="smtp_host" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="smtp.gmail.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">E-mail de Disparo</label>
+                        <input type="email" id="smtp_user" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="contato@empresa.com.br">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Senha (App Password)</label>
+                        <input type="password" id="smtp_password" class="w-full p-2 border border-slate-300 rounded-lg outline-none" placeholder="Sua senha de app">
+                    </div>
+                    <button onclick="cadastrarEmpresa()" class="w-full bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-200">
+                        Criar Empresa
+                    </button>
+                    <p id="msg-empresa" class="text-sm font-medium mt-2 text-center"></p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">2. Importar Clientes</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">ID da Empresa (Gerado ao lado)</label>
+                        <input type="number" id="empresa_id" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Ex: 1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Arquivo de Clientes (.csv)</label>
+                        <input type="file" id="arquivo_csv" accept=".csv" class="w-full p-2 border border-slate-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    </div>
+                    <button onclick="importarCSV()" class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition duration-200">
+                        Fazer Upload do CSV
+                    </button>
+                    <p id="msg-csv" class="text-sm font-medium mt-2 text-center"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">3. Criar Pesquisa</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">ID da Empresa</label>
+                        <input type="number" id="pesquisa_empresa_id" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: 1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Título da Pesquisa</label>
+                        <input type="text" id="titulo_pesquisa" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Avaliação Rodízio Castilho's">
+                    </div>
+                    <button onclick="criarPesquisa()" class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Gerar Link da Pesquisa
+                    </button>
+                                    <button onclick="dispararPesquisa()" class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition mt-4">
+                        📧 Disparar E-mails para a Lista
+                    </button>
+
+                    <p id="msg-pesquisa" class="text-sm font-medium mt-2 text-center"></p>
+                    
+                    <div id="link-container" class="hidden mt-4 p-3 bg-slate-100 rounded border border-slate-200 text-sm break-all text-slate-600"></div>
+                </div>
+            </div>
+
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 md:col-span-2 mt-4">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">4. Resultados da Pesquisa</h2>
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    
+                    <div class="w-full md:w-1/3 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">ID da Pesquisa</label>
+                            <input type="number" id="resultado_pesquisa_id" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Ex: 1">
+                        </div>
+                        <button onclick="verEstatisticas()" class="w-full bg-purple-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-200">
+                            Atualizar Dashboard
+                        </button>
+                        <p id="msg-estatisticas" class="text-sm font-medium mt-2 text-center"></p>
+                    </div>
+
+                    <div class="w-full md:w-2/3 flex justify-around p-6 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="text-center">
+                            <p class="text-slate-500 font-medium text-sm mb-1">Média de Satisfação</p>
+                            <div class="flex items-center justify-center gap-2">
+                                <span id="dash-media" class="text-4xl font-bold text-slate-800">0.0</span>
+                                <span class="text-2xl text-yellow-400">★</span>
+                            </div>
+                        </div>
+                        <div class="w-px bg-slate-200 mx-4"></div> <div class="text-center">
+                            <p class="text-slate-500 font-medium text-sm mb-1">Total de Avaliações</p>
+                            <p id="dash-votos" class="text-4xl font-bold text-slate-800">0</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
