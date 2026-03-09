@@ -32,7 +32,7 @@ def home():
 
 @app.post("/empresas/", response_model=schemas.EmpresaResponse)
 def criar_empresa(empresa: schemas.EmpresaCreate, db: Session = Depends(get_db)):
-    nova_empresa = models.Empresa(**empresa.dict())
+    nova_empresa = models.Empresa(empresa.model_dump())
     db.add(nova_empresa)
     db.commit()
     db.refresh(nova_empresa)
@@ -101,27 +101,50 @@ def obter_estatisticas(pesquisa_id: int, db: Session = Depends(get_db)):
 
 def enviar_email_background(host, user, password, destinatario, assunto, link):
     try:
-        # Monta o visual do e-mail
+        # Aqui você pode trocar o link da imagem para o logo da Amafil ou Castilho's
+        logo_url = "https://cdn-icons-png.flaticon.com/512/3144/3144456.png" 
+        
         corpo_html = f"""
-        <div style='font-family: Arial; padding: 20px; text-align: center; background: #f4f4f9;'>
-            <h2>Olá! Gostaríamos de ouvir você.</h2>
-            <p>Por favor, avalie nosso serviço clicando no botão abaixo:</p>
-            <a href='{link}' style='display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>Avaliar Agora</a>
-        </div>
+        <html>
+            <body style="margin: 0; padding: 0; background-color: #f6f9fc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center" style="padding: 40px 0;">
+                            <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <tr>
+                                    <td align="center" style="padding: 40px 0 20px 0; background-color: #4f46e5;">
+                                        <img src="{logo_url}" alt="Logo" width="80" style="display: block;">
+                                        <h1 style="color: #ffffff; margin-top: 10px; font-size: 24px;">Sua opinião vale muito!</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 40px; text-align: center;">
+                                        <p style="font-size: 18px; color: #475569; line-height: 1.6;">
+                                            Olá! Ficamos felizes em ter você conosco. <br>
+                                            Poderia dedicar 10 segundos para nos dizer o que achou do nosso atendimento?
+                                        </p>
+                                        <div style="margin-top: 30px;">
+                                            <a href="{link}" style="background-color: #4f46e5; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+                                                DAR MINHA NOTA ★★★★★
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 20px; background-color: #f8fafc; text-align: center; font-size: 12px; color: #94a3b8;">
+                                        Este e-mail foi enviado automaticamente por Alexandro Castilho Pesquisas. <br>
+                                        © 2026 Todos os direitos reservados.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+        </html>
         """
         msg = MIMEText(corpo_html, 'html')
-        msg['Subject'] = assunto
-        msg['From'] = user
-        msg['To'] = destinatario
-
-        # Conecta no servidor (Porta 587 é padrão para segurança TLS)
-        server = smtplib.SMTP(host, 587)
-        server.starttls()
-        server.login(user, password)
-        server.sendmail(user, destinatario, msg.as_string())
-        server.quit()
-    except Exception as e:
-        print(f"Erro ao enviar para {destinatario}: {e}")
+        # ... (resto do código de envio continua igual)
 
 @app.post("/pesquisas/{pesquisa_id}/disparar")
 def disparar_emails(pesquisa_id: int, dados: schemas.DisparoCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
@@ -147,3 +170,30 @@ def disparar_emails(pesquisa_id: int, dados: schemas.DisparoCreate, background_t
         count += 1
         
     return {"mensagem": f"Disparo iniciado para {count} clientes em segundo plano!"}
+
+from auth import gerar_senha_hash, verificar_senha, criar_token_acesso
+
+@app.post("/auth/registrar")
+def registrar(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
+    # Verifica se o email já existe
+    db_user = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email já cadastrado")
+    
+    novo_user = models.Usuario(
+        nome=usuario.nome,
+        email=usuario.email,
+        senha_hash=gerar_senha_hash(usuario.senha)
+    )
+    db.add(novo_user)
+    db.commit()
+    return {"mensagem": "Utilizador criado com sucesso!"}
+
+@app.post("/auth/login")
+def login(dados: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.email == dados.email).first()
+    if not user or not verificar_senha(dados.senha, user.senha_hash):
+        raise HTTPException(status_code=401, detail="Email ou senha incorretos")
+    
+    token = criar_token_acesso({"sub": user.email, "id": user.id})
+    return {"access_token": token, "token_type": "bearer", "user_nome": user.nome}

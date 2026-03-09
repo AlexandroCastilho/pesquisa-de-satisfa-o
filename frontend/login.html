@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SaaS Pesquisa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-6 text-center">Acesse sua Conta</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">E-mail</label>
+                <input type="email" id="login_email" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
+                <input type="password" id="login_senha" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+            </div>
+            <button onclick="fazerLogin()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition duration-200">
+                Entrar no Sistema
+            </button>
+            <p id="msg-login" class="text-sm text-center mt-4"></p>
+        </div>
+        
+        <div class="mt-6 border-t pt-4 text-center">
+            <p class="text-slate-500 text-sm">Ainda não tem conta? <a href="#" class="text-indigo-600 font-bold">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev"; // Use a sua URL da porta 8000
+
+        async function fazerLogin() {
+            const email = document.getElementById('login_email').value;
+            const senha = document.getElementById('login_senha').value;
+            const msg = document.getElementById('msg-login');
+
+            try {
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, senha: senha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Guarda o email e o nome na memória do navegador
+                    localStorage.setItem('user_email', email);
+                    localStorage.setItem('user_nome', data.user_nome);
+                    
+                    msg.innerText = "Login realizado! Redirecionando...";
+                    msg.className = "text-sm text-center mt-4 text-emerald-600";
+                    
+                    // Redireciona para o Dashboard
+                    setTimeout(() => { window.location.href = "index.html"; }, 1500);
+                } else {
+                    msg.innerText = data.detail || "Erro ao fazer login.";
+                    msg.className = "text-sm text-center mt-4 text-red-600";
+                }
+            } catch (error) {
+                msg.innerText = "Erro de conexão com o servidor.";
+                msg.className = "text-sm text-center mt-4 text-red-600";
+            }
+        }
+    </script>
+</body>
+</html>

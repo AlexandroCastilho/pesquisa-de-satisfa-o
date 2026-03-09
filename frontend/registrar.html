@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - SaaS Pesquisa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-6 text-center">Criar sua Conta</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Nome Completo</label>
+                <input type="text" id="reg_nome" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ex: Alexandro Castilho">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">E-mail (Será seu ID)</label>
+                <input type="email" id="reg_email" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
+                <input type="password" id="reg_senha" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+            </div>
+            
+            <button onclick="registrarUsuario()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition duration-200">
+                Finalizar Cadastro
+            </button>
+            
+            <p id="msg-reg" class="text-sm text-center mt-4"></p>
+        </div>
+    </div>
+
+    <script>
+        // Use a URL exata do seu backend na porta 8000
+        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev"; 
+
+        async function registrarUsuario() {
+            console.log("Botão clicado!"); // Isso vai aparecer no console para provar que funciona
+            
+            const nome = document.getElementById('reg_nome').value;
+            const email = document.getElementById('reg_email').value;
+            const senha = document.getElementById('reg_senha').value;
+            const msg = document.getElementById('msg-reg');
+
+            if (!nome || !email || !senha) {
+                msg.innerText = "Preencha todos os campos!";
+                msg.className = "text-sm text-center mt-4 text-red-600";
+                return;
+            }
+
+            msg.innerText = "Enviando dados...";
+            msg.className = "text-sm text-center mt-4 text-slate-500";
+
+            try {
+                const response = await fetch(`${apiUrl}/auth/registrar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome: nome, email: email, senha: senha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    msg.innerText = "Cadastro realizado! Indo para o login...";
+                    msg.className = "text-sm text-center mt-4 text-emerald-600";
+                    setTimeout(() => { window.location.href = "login.html"; }, 2000);
+                } else {
+                    msg.innerText = data.detail || "Erro no cadastro.";
+                    msg.className = "text-sm text-center mt-4 text-red-600";
+                }
+            } catch (error) {
+                console.error("Erro na chamada API:", error);
+                msg.innerText = "Erro: API fora do ar.";
+                msg.className = "text-sm text-center mt-4 text-red-600";
+            }
+        }
+    </script>
+</body>
+</html>

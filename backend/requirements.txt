@@ -4,3 +4,5 @@ sqlalchemy
 pydantic
 pandas
 python-multipart
+passlib
+python-jose
