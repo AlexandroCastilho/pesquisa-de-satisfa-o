@@ -1,23 +1,21 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 
-# Esquemas para Usuário
 class UsuarioCreate(BaseModel):
     nome: str
     email: EmailStr
     senha: str
+    
 
 class LoginRequest(BaseModel):
     email: EmailStr
     senha: str
 
-# Esquemas para Empresa (Agora ligada ao email do usuário)
 class EmpresaCreate(BaseModel):
     nome_fantasia: str
     smtp_host: str
     smtp_user: str
     smtp_password: str
-    usuario_email: str # O email de quem está logado
+    usuario_email: str  # <--- O Python exige esse campo agora
 
 class EmpresaResponse(EmpresaCreate):
     id: int

@@ -1,9 +1,10 @@
+import os
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 # Configurações de segurança
-SECRET_KEY = "sua_chave_secreta_super_segura" # Troque isso depois!
+SECRET_KEY = os.getenv("SECRET_KEY", "sua_chave_secreta_super_segura")  # Use variável de ambiente
 ALGORITHM = "HS256"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

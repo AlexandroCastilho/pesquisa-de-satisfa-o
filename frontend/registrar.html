@@ -2,78 +2,60 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - SaaS Pesquisa</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <h1 class="text-3xl font-bold text-indigo-600 mb-6 text-center">Criar sua Conta</h1>
-        
         <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-600 mb-1">Nome Completo</label>
-                <input type="text" id="reg_nome" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ex: Alexandro Castilho">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-600 mb-1">E-mail (Será seu ID)</label>
-                <input type="email" id="reg_email" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-600 mb-1">Senha</label>
-                <input type="password" id="reg_senha" class="w-full p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
-            </div>
-            
-            <button onclick="registrarUsuario()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition duration-200">
+            <input type="text" id="reg_nome" class="w-full p-3 border rounded-lg" placeholder="Nome Completo">
+            <input type="email" id="reg_email" class="w-full p-3 border rounded-lg" placeholder="seu@email.com">
+            <input type="password" id="reg_senha" class="w-full p-3 border rounded-lg" placeholder="Senha">
+            <button onclick="enviarCadastro()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">
                 Finalizar Cadastro
             </button>
-            
             <p id="msg-reg" class="text-sm text-center mt-4"></p>
         </div>
-    </div>
+        
+        <div class="mt-6 border-t pt-4 text-center">
+            <p class="text-slate-500 text-sm">Já tem conta? <a href="login.html" class="text-indigo-600 font-bold">Faça login</a></p>
+        </div>
 
     <script>
-        // Use a URL exata do seu backend na porta 8000
-        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev"; 
+        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev";
 
-        async function registrarUsuario() {
-            console.log("Botão clicado!"); // Isso vai aparecer no console para provar que funciona
-            
-            const nome = document.getElementById('reg_nome').value;
-            const email = document.getElementById('reg_email').value;
-            const senha = document.getElementById('reg_senha').value;
+        async function enviarCadastro() {
+            const nome = document.getElementById('reg_nome').value.trim();
+            const email = document.getElementById('reg_email').value.trim();
+            const senha = document.getElementById('reg_senha').value.trim();
             const msg = document.getElementById('msg-reg');
 
             if (!nome || !email || !senha) {
-                msg.innerText = "Preencha todos os campos!";
-                msg.className = "text-sm text-center mt-4 text-red-600";
+                msg.innerText = "Preencha todos os campos.";
+                msg.className = "text-red-600 text-center mt-4";
                 return;
             }
-
-            msg.innerText = "Enviando dados...";
-            msg.className = "text-sm text-center mt-4 text-slate-500";
 
             try {
                 const response = await fetch(`${apiUrl}/auth/registrar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome: nome, email: email, senha: senha })
+                    body: JSON.stringify({ nome, email, senha })
                 });
 
-                const data = await response.json();
-
                 if (response.ok) {
-                    msg.innerText = "Cadastro realizado! Indo para o login...";
-                    msg.className = "text-sm text-center mt-4 text-emerald-600";
-                    setTimeout(() => { window.location.href = "login.html"; }, 2000);
+                    msg.innerText = "Cadastro realizado! Indo para login...";
+                    msg.className = "text-emerald-600 text-center mt-4";
+                    setTimeout(() => { window.location.href = "login.html"; }, 1500);
                 } else {
-                    msg.innerText = data.detail || "Erro no cadastro.";
-                    msg.className = "text-sm text-center mt-4 text-red-600";
+                    const error = await response.json();
+                    msg.innerText = error.detail || "Erro ao cadastrar.";
+                    msg.className = "text-red-600 text-center mt-4";
                 }
-            } catch (error) {
-                console.error("Erro na chamada API:", error);
-                msg.innerText = "Erro: API fora do ar.";
-                msg.className = "text-sm text-center mt-4 text-red-600";
+            } catch (err) {
+                msg.innerText = "Erro de conexão/CORS. Verifique o backend.";
+                msg.className = "text-red-600 text-center mt-4";
             }
         }
     </script>

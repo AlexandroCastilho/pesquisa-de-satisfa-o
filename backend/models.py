@@ -1,10 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.sql import func
-from database import Base
+from backend.database import Base
 
 class Usuario(Base):
     __tablename__ = "usuarios"
-    # O email agora é a chave primária (ID oficial)
     email = Column(String, primary_key=True, index=True)
     nome = Column(String)
     senha_hash = Column(String)
@@ -12,13 +11,12 @@ class Usuario(Base):
 class Empresa(Base):
     __tablename__ = "empresas"
     id = Column(Integer, primary_key=True, index=True)
-    # A chave estrangeira agora aponta para o email do usuário
     usuario_email = Column(String, ForeignKey("usuarios.email"))
     nome_fantasia = Column(String, index=True)
     smtp_host = Column(String)
     smtp_user = Column(String)
     smtp_password = Column(String)
-
+    
 class Cliente(Base):
     __tablename__ = "clientes"
     id = Column(Integer, primary_key=True, index=True)
@@ -39,4 +37,4 @@ class Resposta(Base):
     id = Column(Integer, primary_key=True, index=True)
     pesquisa_id = Column(Integer, ForeignKey("pesquisas.id"))
     cliente_id = Column(Integer, ForeignKey("clientes.id"))
-    nota = Column(Integer) # 1 a 5 estrelas
+    nota = Column(Integer)

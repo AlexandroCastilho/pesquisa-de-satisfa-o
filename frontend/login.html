@@ -26,12 +26,12 @@
         </div>
         
         <div class="mt-6 border-t pt-4 text-center">
-            <p class="text-slate-500 text-sm">Ainda não tem conta? <a href="#" class="text-indigo-600 font-bold">Cadastre-se</a></p>
+            <p class="text-slate-500 text-sm">Ainda não tem conta? <a href="registrar.html" class="text-indigo-600 font-bold">Cadastre-se</a></p>
         </div>
     </div>
 
     <script>
-        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev"; // Use a sua URL da porta 8000
+        const apiUrl = "https://ubiquitous-invention-7v76p7v44rwhx6px-8000.app.github.dev"; // Backend FastAPI
 
         async function fazerLogin() {
             const email = document.getElementById('login_email').value;
@@ -50,7 +50,7 @@
                 if (response.ok) {
                     // Guarda o email e o nome na memória do navegador
                     localStorage.setItem('user_email', email);
-                    localStorage.setItem('user_nome', data.user_nome);
+                    localStorage.setItem('user_nome', data.nome);
                     
                     msg.innerText = "Login realizado! Redirecionando...";
                     msg.className = "text-sm text-center mt-4 text-emerald-600";
